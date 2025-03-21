@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id                 String  @id @default(uuid())
+  userId             String  @unique
+  name               String
+  registrationNumber String
+  size               String
+  address            String
+  user               User    @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id       String @id @default(uuid())
+  username String
+  password String
+  email    String
+  phone    String
+  position String
+  company  Company?
+  esgRecords EsgRecord[]
+  consultReports ConsultReport[]
+}
+
+model EsgRecord {
+  id           String @id @default(uuid())
+  userId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  environmentId String
+  socialId     String
+  governanceId String
+
+  user         User       @relation(fields: [userId], references: [id])
+  environment  Environment @relation(fields: [environmentId], references: [id])
+  social       Social      @relation(fields: [socialId], references: [id])
+  governance   Governance  @relation(fields: [governanceId], references: [id])
+}
+
+model Environment {
+  id             String  @id @default(uuid())
+  co2            Float
+  wasteVolume    Float
+  renewableEnergy Float
+  recyclingRate  Float
+  updateTime     DateTime
+  esgRecords     EsgRecord[]
+}
+
+model Social {
+  id                     String @id @default(uuid())
+  employeeSatisfaction   Int
+  totalNumberOfEmployees Int
+  employeeTurnoverRate   Float
+  csrProjects            Int
+  updateTime             DateTime
+  esgRecords             EsgRecord[]
+}
+
+model Governance {
+  id                          String @id @default(uuid())
+  proportionOfIndependent     Float
+  compliance                  Float
+  dataSecurityPolicy          Boolean
+  numberOfFraudCases          Int
+  updateTime                  DateTime
+  esgRecords                  EsgRecord[]
+}
+
+model ConsultReport {
+  id             String  @id @default(uuid())
+  phone          String
+  reportIssue    String
+  email          String
+  companyName    String
+  img            String?
+  date           DateTime
+  timeToConsult  DateTime
+  username       String
+  userId         String
+
+  user           User    @relation(fields: [userId], references: [id])
+}
